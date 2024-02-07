@@ -1,0 +1,60 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                                     Total Lock MT4|
+//|                                                  forexroboteasy.com|
+//|                                                Forex Robot Easy Team|
+//+------------------------------------------------------------------+
+
+// Global variables
+double stopLoss = 0.0; // Initial stop loss level
+double lockLevel = 0.0; // Lock level to freeze the loss
+bool isLockActivated = false; // Flag to indicate if lock is activated
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+    // Set initial stop loss level
+    stopLoss = NormalizeDouble(Ask - (Ask - Bid) * 1.5, Digits);
+
+    return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Expert start function                                            |
+//+------------------------------------------------------------------+
+void OnTick()
+{
+    // Check if lock is already activated
+    if (!isLockActivated)
+    {
+        // Check if market moves against trader's position
+        if (Bid < stopLoss)
+        {
+            // Activate lock and freeze the loss
+            isLockActivated = true;
+            lockLevel = stopLoss;
+            Print('Lock activated at ', lockLevel);
+        }
+    }
+    else
+    {
+        // Check if market moves further against trader's position
+        if (Bid < lockLevel)
+        {
+            // Update lock level
+            lockLevel = Bid;
+            Print('Lock updated at ', lockLevel);
+        }
+    }
+}
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+    // Print final lock level
+    Print('Final lock level is ', lockLevel);
+}
